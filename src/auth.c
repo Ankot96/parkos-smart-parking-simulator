@@ -2,8 +2,7 @@
 #include <string.h>
 #include "../include/auth.h"
 #include "../include/ui.h"
-int login()
-{
+int login(){
     char username[20], password[20];
     printf(BOLD CYAN "\n======= ParkOS Login =======\n" RESET);
     printf(YELLOW "Username: " RESET);
@@ -12,13 +11,13 @@ int login()
     scanf("%s", password);
     
     //Employee Login
-    if(strcmp(username, "employee") == 0 && strcmp(password, "123") == 0){
+    if(strcmp(username, "employee")==0 &&strcmp(password, "123")==0){
         printf(GREEN "\n✔ Login Successful (Employee)\n" RESET);
         return 1;
     }
 
     //Manager Login
-    if(strcmp(username, "manager") == 0 && strcmp(password, "admin") == 0){
+    if(strcmp(username, "manager")==0&&strcmp(password, "admin")==0){
         printf(GREEN "\n✔ Login Successful (Manager)\n" RESET);
         return 2;
     }
