@@ -1,7 +1,7 @@
 #ifndef UI_H
 #define UI_H
 
-// 🎨 Colors
+//Color Codes
 #define RESET   "\033[0m"
 #define RED     "\033[31m"
 #define GREEN   "\033[32m"
