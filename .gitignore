@@ -1,4 +1,7 @@
 parkos
+parking
+test
+*.out
 *.o
 exit_pipe
 data/parking_log.txt
