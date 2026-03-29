@@ -1,103 +1,103 @@
 # ParkOS – Smart Parking Management System
 
-## Overview
+## 1. Overview
 
-**ParkOS** is a simulation-based smart parking management system developed in C for Linux.
-The project demonstrates practical usage of **Linux system calls, POSIX APIs, IPC mechanisms, multithreading, synchronization, and signal handling**.
+ParkOS is a simulation-based smart parking management system developed in C for Linux environments. The project demonstrates the practical application of Linux system programming concepts including process management, inter-process communication (IPC), multithreading, synchronization, signal handling, and low-level file operations.
 
-The system simulates real-world parking operations such as vehicle entry, exit, slot allocation, monitoring, and logging — all without using any hardware.
-
----
-
-## Objectives
-
-* Implement a **multi-process system** using `fork()` and `waitpid()`
-* Demonstrate **Inter-Process Communication (IPC)** using:
-
-  * Pipe
-  * FIFO (Named Pipe)
-* Use **POSIX Threads (pthreads)** for concurrent monitoring
-* Ensure **thread synchronization** using mutex
-* Perform **low-level file I/O operations**
-* Implement **signal handling** for graceful shutdown
-* Design a **modular multi-file system**
+The system simulates real-world parking operations such as vehicle entry, exit, slot allocation, monitoring, and logging without relying on any physical hardware.
 
 ---
 
-## System Architecture
+## 2. Objectives
 
-### Main Controller (Parent Process)
-
-* Handles UI, login, and system coordination
-* Spawns child processes for entry and exit
-* Receives data via IPC
+* Design a multi-process system using `fork()` and `waitpid()`
+* Implement IPC using pipe and FIFO (named pipes)
+* Use POSIX threads for concurrent monitoring
+* Apply synchronization using mutex mechanisms
+* Perform low-level file handling using system calls
+* Handle signals for controlled execution and shutdown
+* Maintain modular and scalable code structure
 
 ---
 
-### Entry Process (Child)
+## 3. System Architecture
+
+### 3.1 Parent Process (Controller)
+
+The main process acts as the system controller. It is responsible for:
+
+* User authentication and interface management
+* Creating and supervising child processes
+* Coordinating IPC and core parking logic
+
+### 3.2 Entry Process
 
 * Created using `fork()`
-* Takes vehicle input from user
-* Sends vehicle number to parent via **pipe**
+* Accepts vehicle input from user
+* Sends data to parent via pipe
 
----
-
-### Exit Process (Child)
+### 3.3 Exit Process
 
 * Created using `fork()`
-* Sends vehicle number via **FIFO (named pipe)**
+* Sends vehicle exit information using FIFO
+
+### 3.4 Parking Manager Module
+
+* Core logic for slot allocation and removal
+* Maintains parking state
+* Interacts with database and logging system
+
+### 3.5 Monitoring Thread
+
+* Continuously observes parking occupancy
+* Runs concurrently using POSIX threads
+* Uses mutex to ensure safe shared data access
 
 ---
 
-### Monitor Thread
+## 4. Inter-Process Communication
 
-* Runs continuously in background
-* Displays parking occupancy status
-* Uses `pthread` and `mutex` for safe access
+| Mechanism | Purpose                               |
+| --------- | ------------------------------------- |
+| Pipe      | Entry process to parent communication |
+| FIFO      | Exit process to parent communication  |
 
----
-
-## Inter-Process Communication (IPC)
-
-| Mechanism | Purpose                |
-| --------- | ---------------------- |
-| Pipe      | Entry process → Parent |
-| FIFO      | Exit process → Parent  |
+The selection of IPC mechanisms is based on communication direction and persistence requirements.
 
 ---
 
-## Synchronization
+## 5. Threading and Synchronization
 
+* A dedicated monitoring thread runs in parallel with the main process
 * Shared resources:
 
   * Parking slots array
-  * Parked cars list
+  * Parked vehicle records
 * Protected using:
 
-  ```c
-  pthread_mutex_t lock;
-  ```
+  * `pthread_mutex_lock()`
+  * `pthread_mutex_unlock()`
+
+This ensures data consistency and prevents race conditions.
 
 ---
 
-## File Handling
+## 6. File I/O and Data Management
 
-### Vehicle Database
+### 6.1 Vehicle Database
 
 * File: `data/vehicle_db.txt`
-* Stores vehicle types
+* Stores vehicle number and type mappings
 * Accessed using:
 
   * `open()`
   * `read()`
   * `close()`
 
----
-
-### Logging System
+### 6.2 Logging System
 
 * File: `data/parking_log.txt`
-* Logs all entry/exit events
+* Records entry and exit events
 * Uses:
 
   * `open()`
@@ -106,13 +106,13 @@ The system simulates real-world parking operations such as vehicle entry, exit, 
 
 ---
 
-## System Calls Used
+## 7. System Calls and APIs Used
 
-### File I/O
+### File Operations
 
 * `open()`, `read()`, `write()`, `lseek()`, `close()`
 
-### Process Control
+### Process Management
 
 * `fork()`, `waitpid()`
 
@@ -120,200 +120,155 @@ The system simulates real-world parking operations such as vehicle entry, exit, 
 
 * `pipe()`, `mkfifo()`, `read()`, `write()`
 
-### Threads
+### Threading
 
 * `pthread_create()`, `pthread_mutex_lock()`, `pthread_mutex_unlock()`
 
-### Signals
+### Signal Handling
 
-* `SIGINT` → graceful shutdown
-* `SIGUSR1` → status trigger
+* `signal()`
+* `SIGINT` for graceful shutdown
+* `SIGUSR1` for runtime status trigger
 
 ---
 
-## Authentication System
+## 8. Authentication System
 
 | Role     | Permissions                         |
 | -------- | ----------------------------------- |
-| Employee | Park / Remove vehicles              |
-| Manager  | Full access (including status view) |
+| Employee | Park and remove vehicles            |
+| Manager  | Full access including system status |
 
 ### Credentials
 
-**Employee**
+Employee
 
-* Username: `employee`
-* Password: `123`
+* Username: employee
+* Password: 123
 
-**Manager**
+Manager
 
-* Username: `manager`
-* Password: `admin`
-
----
-
-## User Interface
-
-* Terminal-based UI with ANSI colors
-* Boot-style startup screen
-* Menu-driven interaction
-* Real-time updates
+* Username: manager
+* Password: admin
 
 ---
 
-## Program Flow
+## 9. Program Flow
 
-```
-Start Program
-   ↓
-Boot Screen (UI)
-   ↓
-Login (Auth Module)
-   ↓
-Main Menu
-   ↓
-User Selection:
-   1 → Entry → Pipe → park_car()
-   2 → Exit → FIFO → remove_car()
-   3 → View Status (Manager only)
-   ↓
-Monitor Thread runs in background
-   ↓
-Logs written to file
-   ↓
-Signal handles shutdown
-```
+1. System startup and initialization
+2. User authentication
+3. Menu-driven operation
+4. Vehicle entry or exit selection
+5. IPC communication with child processes
+6. Parking allocation or removal
+7. Logging of operations
+8. Continuous monitoring via thread
+9. Signal-based shutdown handling
 
 ---
 
-## Simulation Features
+## 10. Simulation Features
 
-* Delays using `sleep()` to simulate real-world parking
+* Time delays using `sleep()` to simulate real parking behavior
 * File-based vehicle classification
-* Manual user input
-* Continuous monitoring thread
+* Controlled user input
+* Background monitoring thread
 
 ---
 
-## Project Structure
+## 11. Project Structure
 
 ```
 parkos-smart-parking-simulator/
 │
 ├── src/
-│   ├── main.c
-│   ├── parking_manager.c
-│   ├── database.c
-│   ├── ui.c
-│   ├── auth.c
-│
 ├── include/
-│   ├── parking_manager.h
-│   ├── database.h
-│   ├── ui.h
-│   ├── auth.h
-│
 ├── data/
-│   ├── vehicle_db.txt
-│   └── parking_log.txt
 │
+├── docs/               (architecture diagrams)
 ├── Makefile
-└── README.md
+├── README.md
+└── .gitignore
 ```
 
 ---
 
-## Build Instructions
+## 12. Build Instructions
 
-```bash
+```
 make
 ```
 
 ---
 
-## Run Instructions
+## 13. Execution
 
-```bash
+```
 make run
 ```
 
 ---
 
-## Setup Requirement
+## 14. Setup Requirement
 
-Create FIFO before running:
+Create FIFO before execution:
 
-```bash
+```
 mkfifo exit_pipe
 ```
 
 ---
 
-## Sample Run
+## 15. Sample Execution
 
 ```
-[BOOT] Initializing system...
-[SUCCESS] System Ready
-
-Login:
-Username: manager
-Password: admin
-
-1. Park Vehicle
-2. Remove Vehicle
-3. View Status
-
-Enter choice: 1
-Car parked successfully
+System initialized
+Login successful
+Menu displayed
+Vehicle parked and logged
 ```
 
 ---
 
-## Clean Build
-
-```bash
-make clean
-```
-
----
-
-## Key Features
+## 16. Key Features
 
 * Multi-process architecture
-* Dual IPC mechanisms
+* Dual IPC implementation
 * Thread-based monitoring
-* Real-time logging
-* Signal-based control
-* Modular and scalable design
+* Synchronization using mutex
+* Signal-based lifecycle control
+* Structured logging system
+* Modular code design
 
 ---
 
-## Limitations
+## 17. Limitations
 
-* No GUI (terminal-based only)
-* Static parking capacity
+* Terminal-based interface only
+* Fixed parking capacity
 * No persistent database updates
+* Limited error recovery scenarios
 
 ---
 
-## Learning Outcomes
+## 18. Learning Outcomes
 
-* Understanding of Linux system calls
-* Process management and IPC
+* Practical understanding of Linux system programming
+* Process creation and management
+* IPC design and implementation
 * Thread synchronization
-* File handling at low level
-* System-level program design
+* Low-level file handling
+* System architecture design
 
 ---
 
-## 🏁 Conclusion
+## 19. Conclusion
 
-ParkOS successfully demonstrates a **complete system-level simulation** integrating processes, threads, IPC, signals, and file handling.
-It reflects real-world system design principles and satisfies all requirements of the mini project guidelines.
+ParkOS is a complete simulation of a smart parking system integrating multiple core Linux programming concepts. The project demonstrates a well-structured and scalable approach to system-level software design and satisfies all requirements of the mini project guidelines.
 
 ---
 
-## 👨‍💻 Author
+## 20. Author
 
 Yash Bhosale
-ParkOS – Smart Parking Simulation System
+Embedded Linux Mini Project – ParkOS
